@@ -1,18 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const app = express();
 
 // ─── 2. Importação dos Middlewares Customizados ───────────────
-const logger = require('./middlewares/logger');
+//const logger = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
 
 // ─── 3. Criação da Aplicação Express ─────────────────────────
-const app = express();
+
 
 // ─── 4. Middlewares Globais ──────────────────────────────────
 app.use(cors());
 app.use(express.json());
-app.use(logger);
+//app.use(logger);
 
 // ─── 5. Rota de Boas-Vindas ───────────────────────────────────
 app.get('/', (req, res) => {

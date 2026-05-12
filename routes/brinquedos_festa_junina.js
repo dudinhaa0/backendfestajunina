@@ -1,12 +1,18 @@
-import express from 'express';
-import { supabase } from '../data/supabase.js';
-
+const express = require('express');
+const { supabase } = require('../data/supabase'); 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const { data, error } = await supabase.from('brinquedos_festa_junina').select('*');
-  if (error) return res.status(400).json(error);
-  res.json(data);
+    try {
+        const { data, error } = await supabase
+            .from('brinquedos_festa_junina')
+            .select('*');
+
+        if (error) throw error;
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
 });
 
-export default router;
+module.exports = router;
