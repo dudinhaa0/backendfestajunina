@@ -1,7 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js'); // Certifique-se de ter essa linha
+
 const app = express();
+
+// Conexão com Supabase (use as variáveis que você já tem no .env)
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // ─── 2. Importação dos Middlewares Customizados ───────────────
 //const logger = require('./middlewares/logger');
@@ -28,6 +33,44 @@ const rotasBrinquedos = require('./routes/brinquedos_festa_junina');
 app.use('/api/shows', rotasShows);
 app.use('/api/comidas', rotasComidas);
 app.use('/api/brinquedos', rotasBrinquedos);
+
+// --- COLOQUE ISSO NA SEÇÃO 6 DO SEU CÓDIGO ---
+
+// ROTA PARA BUSCAR OS RECADOS (O Mural lê daqui)
+// --- COLOQUE ISSO NO SEU SERVER.JS (Substituindo as rotas antigas do correio se houver) ---
+
+// ROTA PARA BUSCAR RECADOS (Mural)
+app.get('/api/correio', async (req, res) => {
+    const { data, error } = await supabase
+        .from('correio_elegante') // Nome da tabela que você mandou no print
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error) {
+        console.error("Erro Supabase:", error);
+        return res.status(400).json(error);
+    }
+    res.json(data);
+});
+
+// ROTA PARA ENVIAR RECADO (Formulário)
+app.post('/api/correio', async (req, res) => {
+    const { remetente, destinatario, mensagem } = req.body;
+    
+    const { data, error } = await supabase
+        .from('correio_elegante')
+        .insert([{ 
+            remetente: remetente || 'Anônimo', 
+            destinatario: destinatario, 
+            mensagem: mensagem 
+        }]);
+
+    if (error) {
+        console.error("Erro ao inserir:", error);
+        return res.status(400).json(error);
+    }
+    res.status(201).json({ sucesso: true, mensagem: "Recado guardado no Supabase!" });
+});
 
 // ─── 7. Tratamento de Rota não encontrada (404) ───────────────
 app.use((req, res, next) => {
